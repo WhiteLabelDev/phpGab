@@ -121,17 +121,13 @@ function Gab_TokenGet ($_GabUsername, $_GabPassword) {
 	for ($i = 0; $i < 2; ++$i) {
 		if (!$i) {
 			list ($_GabHead, $_GabBody) = Gab_cURL ('https://gab.ai/auth/login');
-			//$_GabBody = file_get_contents ('/tmp/login.html'); // FIXME Remove HACK
 		} else {
 			list ($_GabHead, $_GabBody) = Gab_cURL ('https://gab.ai/auth/login', 'POST', array (
 				'_token' => $_GabToken,
 				'username' => $_GabUsername,
 				'password' => $_GabPassword,
 				'remember' => 'on'
-			), NULL /*array (
-				//'Content-Type: application/x-www-form-urlencoded'
-			)*/);
-			//$_GabBody = file_get_contents ('/tmp/okay.html'); // FIXME Remove HACK
+			));
 		}
 
 		if (FALSE === $_GabBody)
