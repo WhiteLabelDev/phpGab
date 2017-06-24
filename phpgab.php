@@ -3,10 +3,11 @@
 /**
  * phpGab
  *
- * Gab.ai does not currently have a public API or documentation, so here
- * are some basic, quick and dirty PHP functions to get you started talking
- * to the Gab.ai API. Presently only posting a plain text Gab is supported,
- * but this should be easy to extend to start doing other things.
+ * Gab.ai does not currently have a public API or much documentation, so
+ * here are some basic, quick and dirty PHP functions to get you started
+ * talking to the Gab.ai API unofficially. Presently only posting a plain
+ * text Gab is supported, but this should be easy to extend to start doing
+ * other things.
  *
  * This is wholly unofficial, likely to break, and hopefully a temporary
  * solution until Gab release an official public API. Use at your own risk
@@ -63,26 +64,6 @@ function Gab_Send ($_GabUsername, $_GabPassword, $_GabGab) {
 
 	// Return the API response to caller
 	return (FALSE === $_GabBody ? FALSE : json_decode ($_GabBody, TRUE));
-}
-
-/**
- * Extracts a Gab token (both login tokens and JWT
- * bearer tokens) from a line of text
- * Returns FALSE on error or the extracted token
- * string on success.
- *
- * @param string $_GabTokenLine Line of text with a token
- * @return mixed
- * @since PHP 5
- **/
-function Gab_TokenExtract ($_GabTokenLine) {
-	// Attempt to extract the token in the cheapest way possible
-	$_GabTokenLine = explode ('"', $_GabTokenLine);
-	$_GabTokenCount = count ($_GabTokenLine);
-	if ($_GabTokenCount < 2 || strlen ($_GabTokenLine[$_GabTokenCount - 2]) < 40)
-		return FALSE;
-
-	return trim ($_GabTokenLine[$_GabTokenCount - 2]);
 }
 
 /**
@@ -160,6 +141,26 @@ function Gab_TokenGet ($_GabUsername, $_GabPassword) {
 }
 
 /**
+ * Extracts a Gab token (both login tokens and JWT
+ * bearer tokens) from a line of text
+ * Returns FALSE on error or the extracted token
+ * string on success.
+ *
+ * @param string $_GabTokenLine Line of text with a token
+ * @return mixed
+ * @since PHP 5
+ **/
+function Gab_TokenExtract ($_GabTokenLine) {
+	// Attempt to extract the token in the cheapest way possible
+	$_GabTokenLine = explode ('"', $_GabTokenLine);
+	$_GabTokenCount = count ($_GabTokenLine);
+	if ($_GabTokenCount < 2 || strlen ($_GabTokenLine[$_GabTokenCount - 2]) < 40)
+		return FALSE;
+
+	return trim ($_GabTokenLine[$_GabTokenCount - 2]);
+}
+
+/**
  * cURL header callback
  * This function gets called for every header returned
  * in the HTTP response. They are stored in an array
@@ -180,7 +181,7 @@ function Gab_HeaderGet ($_GabCH, $_GabHeaderLine) {
 	// Strip newlines and split on header delimiter
 	$_GabHeaderParts = explode (': ', str_replace ("\n", '', str_replace ("\r", '', $_GabHeaderLine)), 2);
 
-	// Catch rows like "HTTP/1.1 OK"
+	// Catch rows like "HTTP/1.1 200 OK"
 	if (!isset ($_GabHeaderParts[1]))
 		$_GabHeaderParts = explode (' ', $_GabHeaderParts[0], 2);
 
@@ -220,6 +221,7 @@ function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader 
 	$_GabCH = curl_init ();
 	if (FALSE !== $_GabCH) {
 		// Construct cookie jar file path
+		// TODO This should probably be deleted between requests in case it gets shared between users?
 		$_GabCookieFile = sys_get_temp_dir ().'/.cookies.gab';
 
 		// Setup connection options
@@ -235,7 +237,7 @@ function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader 
 		curl_setopt ($_GabCH, CURLOPT_ENCODING, 'gzip, deflate');	// Reduce Gabs bandwidth costs for our requests
 		curl_setopt ($_GabCH, CURLOPT_COOKIEJAR, $_GabCookieFile);	// Location to store inter-request cookies
 		curl_setopt ($_GabCH, CURLOPT_COOKIEFILE, $_GabCookieFile);	// Location to load inter-request cookies
-		curl_setopt ($_GabCH, CURLOPT_USERAGENT, 'phpGab 1.0');		// Be transparent about what we are
+		curl_setopt ($_GabCH, CURLOPT_USERAGENT, 'phpGab/1.0');		// Be transparent about what we are
 		curl_setopt ($_GabCH, CURLOPT_HEADERFUNCTION, 'Gab_HeaderGet');	// Where header lines get sent for processing
 
 		// If this is a POST request, add relevant settings and data

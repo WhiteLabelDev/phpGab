@@ -1,21 +1,22 @@
 # phpGab
 
-Gab.ai does not currently have a public API or documentation, so here are some basic, quick and dirty PHP functions to get you started talking to the Gab.ai API. Presently only posting a plain text Gab is supported, but this should be easy to extend to start doing other things.
+Gab.ai does not currently have a public API or [much](https://gab.ai/docs) documentation, so here are some basic, quick and dirty PHP functions to get you started talking to the Gab.ai API unofficially. Presently only posting a plain text Gab is supported, but this should be easy to extend to start doing other things.
 
-This is wholly unofficial, likely to break, and hopefully a temporary solution until Gab release an official public API. Use at your own risk and be sure to follow the Gab terms of service: [https://gab.ai/about/tos]
+This is wholly unofficial, likely to break, and hopefully a temporary solution until Gab release an official public API. Use at your own risk and be sure to follow the Gab terms of service: [https://gab.ai/about/tos](https://gab.ai/about/tos)
 
 **Please be respectful and do not spam Gab with this script!**
 
-You can follow us at [https://gab.ai/white_label_dev]
+You can follow us at [https://gab.ai/white_label_dev](https://gab.ai/white_label_dev)
 
 
 ## Features
 
-1. Logs in to your Gab and stores a bearer token for further requests
-2. Automatically detects expired tokens and changed credentials
-3. Well documented, easy to extend to perform other Gab functionality
-4. Works on PHP 5+, no database required
-5. Licensed under MIT
+1. Logs in to your Gab acocunt to retrieve tokens **automatically**
+2. Locally caches bearer tokens for very fast future requests
+3. Automatically detects expired tokens and changed credentials
+4. Well documented, easy to extend to perform other Gab functionality
+5. Works on PHP 5+, **no database required**
+6. Licensed under MIT
 
 
 ## Usage
@@ -27,7 +28,7 @@ require_once 'phpgab.php';
 
 //$debug = TRUE;
 
-$GabResponse = Gab_Send ('your_gab_username', 'your_gab_password', 'This gab came straight from phpGab. Hello world!');
+$GabResponse = Gab_Send ('your_gab_username', 'your_gab_password', 'This gab is from phpGab. Hello world!');
 var_dump ($GabResponse);
 
 ?>
@@ -69,7 +70,7 @@ array(5) {
     ["edited"]=>
     bool(false)
     ["body"]=>
-    string(48) "This gab came straight from phpGab. Hello world!"
+    string(48) "This gab is from phpGab. Hello world!"
     ["only_emoji"]=>
     bool(false)
     ["liked"]=>
