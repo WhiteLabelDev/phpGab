@@ -11,7 +11,7 @@ You can follow us at [https://gab.ai/white_label_dev](https://gab.ai/white_label
 
 ## Features
 
-1. Logs in to your Gab acocunt to retrieve tokens **automatically**
+1. Logs in to your Gab account to retrieve tokens **automatically**
 2. Locally caches bearer tokens for very fast future requests
 3. Automatically detects expired tokens and changed credentials
 4. Well documented, easy to extend to perform other Gab functionality
