@@ -19,7 +19,7 @@
  * @author White Label Dev Ltd
  * @copyright 2017 White Label Dev Ltd
  * @license See LICENSE file
- * @version 1.0
+ * @version 1.1
  */
 
 
@@ -211,7 +211,7 @@ function Gab_HeaderGet ($_GabCH, $_GabHeaderLine) {
  * @since PHP 5
  **/
 function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader = NULL) {
-	global $debug, $_GabHead;
+	global $debug, $_GabHead, $_GabCookieFile;
 
 	// Reset the headers and body for a new request
 	$_GabHead = array ();
@@ -220,9 +220,9 @@ function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader 
 	// Check cURL is enabled
 	$_GabCH = curl_init ();
 	if (FALSE !== $_GabCH) {
-		// Construct cookie jar file path
-		// TODO This should probably be deleted between requests in case it gets shared between users?
-		$_GabCookieFile = sys_get_temp_dir ().'/.cookies.gab';
+		// Create cookie jar file
+		if (!isset ($_GabCookieFile))
+			$_GabCookieFile = tempnam (sys_get_temp_dir (), '.gab');
 
 		// Setup connection options
 		curl_setopt ($_GabCH, CURLOPT_URL, $_GabURL);			// The URL to open
