@@ -1,1 +1,5 @@
+# Development test script
 testsend.php
+
+# Credential files
+*.gab

@@ -26,7 +26,7 @@ You can follow us at [https://gab.ai/white_label_dev](https://gab.ai/white_label
 
 require_once 'phpgab.php';
 
-//$debug = TRUE;
+//$DEBUG = TRUE;
 
 $GabResponse = Gab_Send ('your_gab_username', 'your_gab_password', 'This gab is from phpGab. Hello world!');
 var_dump ($GabResponse);
@@ -35,13 +35,13 @@ var_dump ($GabResponse);
 
 array(5) {
   ["id"]=>
-  string(7) "9999999"
+  string(36) "0c2e56b8-41fc-4a20-a758-9e1f822bdfd9"
   ["published_at"]=>
   string(25) "2017-06-23T21:30:25+00:00"
   ["type"]=>
   string(4) "post"
   ["actuser"]=>
-  array(8) {
+  array(10) {
     ["id"]=>
     int(195348)
     ["name"]=>
@@ -54,23 +54,33 @@ array(5) {
     bool(false)
     ["is_donor"]=>
     bool(false)
+    ["is_investor"]=>
+    bool(false)
     ["is_pro"]=>
     bool(false)
     ["is_private"]=>
     bool(false)
+    ["is_premium"]=>
+    bool(false)
   }
   ["post"]=>
-  array(22) {
+  array(32) {
     ["id"]=>
-    int(9159923)
+    int(99999999)
     ["created_at"]=>
-    string(25) "2017-06-23T21:30:24+00:00"
+    string(25) "2017-06-23T21:30:25+00:00"
     ["revised_at"]=>
     NULL
     ["edited"]=>
     bool(false)
     ["body"]=>
-    string(48) "This gab is from phpGab. Hello world!"
+    string(37) "This gab is from phpGab. Hello world!"
+    ["body_html"]=>
+    string(44) "<p>This gab is from phpGab. Hello world!</p>"
+    ["body_html_summary"]=>
+    string(44) "<p>This gab is from phpGab. Hello world!</p>"
+    ["body_html_summary_truncated"]=>
+    bool(false)
     ["only_emoji"]=>
     bool(false)
     ["liked"]=>
@@ -89,6 +99,10 @@ array(5) {
     int(0)
     ["dislike_count"]=>
     int(0)
+    ["reply_count"]=>
+    int(0)
+    ["repost_count"]=>
+    int(0)
     ["is_quote"]=>
     bool(false)
     ["is_reply"]=>
@@ -102,31 +116,44 @@ array(5) {
       ["iframe"]=>
       NULL
     }
+    ["attachment"]=>
+    array(2) {
+      ["type"]=>
+      NULL
+      ["value"]=>
+      NULL
+    }
     ["category"]=>
     NULL
     ["category_details"]=>
     NULL
     ["language"]=>
     string(2) "en"
-    ["user"]=>
-    array(8) {
-      ["id"]=>
-      int(195348)
-      ["name"]=>
-      string(12) "We make apps"
-      ["username"]=>
-      string(15) "white_label_dev"
-      ["picture_url"]=>
-      string(43) "https://files.gab.ai/user/594d067129f06.png"
-      ["verified"]=>
-      bool(false)
-      ["is_donor"]=>
-      bool(false)
-      ["is_pro"]=>
-      bool(false)
-      ["is_private"]=>
-      bool(false)
+    ["nsfw"]=>
+    bool(false)
+    ["is_premium"]=>
+    bool(false)
+    ["is_locked"]=>
+    bool(false)
+    ["user"]=> &actuser
+    ["replies"]=>
+    array(1) {
+      ["data"]=>
+      array(0) {
+      }
     }
   }
 }
+```
+
+The above is an example of sending a simple plain text gab to your timeline. It is possible to construct a more elaborate gab by overriding the basic envelope options. The following example posts to the Philosophy topic.
+
+```
+$Gab = array (
+    'body' => '<p>Turn off the light switch before changing the bulb. #Wisdom</p>',
+    'is_html' => '1',
+    'topic' => '5436f0a7-548a-4445-ad91-7db971b48c84'
+);
+
+$GabResponse = Gab_DoPost ('your_gab_username', 'your_gab_password', $Gab);
 ```

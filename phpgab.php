@@ -16,44 +16,63 @@
  *
  * You can follow us at https://gab.ai/white_label_dev
  *
- * @author White Label Dev Ltd
- * @copyright 2017 White Label Dev Ltd
+ * @author WLD-PJ <hello@white-label-dev.co.uk>
+ * @copyright 2017-18 White Label Dev Ltd
  * @license See LICENSE file
- * @version 1.1
+ * @version 1.2
  */
 
 
 /**
- * Sends a plain text Gab
- * Returns FALSE on error or an array of details about
- * the posted gab on success.
+ * Helper wrapper to send a plain text Gab
  *
  * @param string $_GabUsername The Gab account username
  * @param string $_GabPassword The Gab account password
  * @param string $_Gab The gab to post (max 300 chars)
- * @return mixed
- * @since PHP 5
- **/
+ * @return mixed FALSE if the Gab was sent or array of detail on success
+ */
 function Gab_Send ($_GabUsername, $_GabPassword, $_GabGab) {
+	$_GabEnvelope = array (
+		'body' => $_GabGab,
+		'is_html' => '0'
+	);
+
+	return Gab_DoPost ($_GabUsername, $_GabPassword, $_GabEnvelope);
+}
+
+/**
+ * The actual cURL request to post the gab to the API
+ *
+ * @param string $_GabUsername The Gab account username
+ * @param string $_GabPassword The Gab account password
+ * @param string $_GabEnvelope The gab and all relevant metadata
+ * @return mixed FALSE if the Gab was sent or array of detail on success
+ */
+function Gab_DoPost ($_GabUsername, $_GabPassword, $_GabEnvelope) {
 	// Get the JWT token
 	$_GabToken = Gab_TokenGet ($_GabUsername, $_GabPassword);
 	if (FALSE === $_GabToken)
 		return FALSE;
 
-	// Construct the gab post
-	$_GabPost = json_encode (array (
-		'body' => $_GabGab,
+	// Construct a generic gab post envelope
+	$_GabPost = array (
+		'body' => '',
 		'reply_to' => '',
 		'is_quote' => '0',
+		'is_html' => '0',
+		'nsfw' => '0',
+		'is_premium' => '0',
 		'_method' => 'post',
 		'gif' => '',
-		'category' => NULL,
 		'topic' => NULL,
-		'file' => NULL,
+		'group' => NULL,
 		'share_facebook' => NULL,
 		'share_twitter' => NULL,
-		'is_replies_disabled' => FALSE
-	));
+		'media_attachments' => array ()
+	);
+
+	// Merge in user override envelope
+	$_GabPost = json_encode (array_merge ($_GabPost, $_GabEnvelope));
 
 	// Send the gab to the Gab API
 	list ($_GabHead, $_GabBody) = Gab_cURL ('https://gab.ai/posts', 'POST', $_GabPost, array (
@@ -68,20 +87,18 @@ function Gab_Send ($_GabUsername, $_GabPassword, $_GabGab) {
 
 /**
  * Gets a Gab JWT bearer token for future API requests
- * Returns FALSE on error or a token string on success.
- * Attempts to first retrieve a locally cached token
- * for the user, or does a Gab login to retrieve one
- * otherwise. When a token is retrieved it is cached
- * locally for quicker future API requests.
+ *
+ * Attempts to first retrieve a locally cached token for the user,
+ * or does a Gab login to retrieve one otherwise. When a token is
+ * retrieved it is cached locally for quicker future API requests.
  *
  * @param string $_GabUsername The Gab account username
  * @param string $_GabPassword The Gab account password
  * @param string $_Gab The gab to post (max 300 chars)
- * @return mixed
- * @since PHP 5
- **/
+ * @return mixed FALSE on error or a token string on success
+ */
 function Gab_TokenGet ($_GabUsername, $_GabPassword) {
-	global $debug;
+	global $DEBUG;
 
 	// Choose a unique enough filename outside of document root which will be invalidated as soon as any credentials change
 	// TODO Windows user check this path separator and hidden 8.3 name is accepted
@@ -130,7 +147,7 @@ function Gab_TokenGet ($_GabUsername, $_GabPassword) {
 		if (FALSE === $_GabToken)
 			return FALSE;
 
-		if (isset ($debug) && $debug)
+		if (isset ($DEBUG) && $DEBUG)
 			echo (!$i ? 'Login' : 'JWT').' token: '.$_GabToken."\n";
 	}
 
@@ -141,15 +158,12 @@ function Gab_TokenGet ($_GabUsername, $_GabPassword) {
 }
 
 /**
- * Extracts a Gab token (both login tokens and JWT
- * bearer tokens) from a line of text
- * Returns FALSE on error or the extracted token
- * string on success.
+ * Extracts a Gab token (both login tokens and JWT bearer tokens) from
+ * a line of text
  *
  * @param string $_GabTokenLine Line of text with a token
- * @return mixed
- * @since PHP 5
- **/
+ * @return mixed FALSE on error or the extracted token string on success
+ */
 function Gab_TokenExtract ($_GabTokenLine) {
 	// Attempt to extract the token in the cheapest way possible
 	$_GabTokenLine = explode ('"', $_GabTokenLine);
@@ -162,20 +176,19 @@ function Gab_TokenExtract ($_GabTokenLine) {
 
 /**
  * cURL header callback
- * This function gets called for every header returned
- * in the HTTP response. They are stored in an array
- * to be returned to the caller at the end of the cURL
- * request. Returns the number of bytes processed.
+ *
+ * This function gets called for every header returned in the HTTP response.
+ * They are stored in an array to be returned to the caller at the end of
+ * the cURL request.
  *
  * @param resource $_GabCH The cURL resource handle
  * @param string $_GabHeaderLine The header passed in
- * @return int
- * @since PHP 5
- **/
+ * @return int The number of bytes processed.
+ */
 function Gab_HeaderGet ($_GabCH, $_GabHeaderLine) {
 	global $_GabHead;
 
-	if (isset ($debug) && $debug)
+	if (isset ($DEBUG) && $DEBUG)
 		echo 'Processing cURL header: '.$_GabHeaderLine;
 
 	// Strip newlines and split on header delimiter
@@ -194,24 +207,21 @@ function Gab_HeaderGet ($_GabCH, $_GabHeaderLine) {
 
 /**
  * Makes a cURL request
- * Returns an indexed array containing the headers and
- * body of the request. If the request failed then the
- * body component will be FALSE. If the request was
- * successful then the body component will contain the
- * returned remote data and the head component will
- * contain an array of response headers. Call like
- * list ($head, $body) = Gab_cURL (... for a shorthand
+ *
+ * If the request failed then the body component will be FALSE. If the
+ * request was successful then the body component will contain the returned
+ * remote data and the head component will contain an array of response
+ * headers. Call like list ($head, $body) = Gab_cURL (... for a shorthand
  * way of retrieving both components in to variables.
  *
  * @param string $_GabURL The full URL to connect to
  * @param string $_GabMethod One of GET or POST
  * @param mixed $_GabData Optional data to POST
  * @param mixed $_GabHeader Optional headers to send
- * @return array
- * @since PHP 5
- **/
+ * @return array Indexed array containing the headers and body of the request
+ */
 function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader = NULL) {
-	global $debug, $_GabHead, $_GabCookieFile;
+	global $DEBUG, $_GabHead, $_GabCookieFile;
 
 	// Reset the headers and body for a new request
 	$_GabHead = array ();
@@ -237,7 +247,7 @@ function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader 
 		curl_setopt ($_GabCH, CURLOPT_ENCODING, 'gzip, deflate');	// Reduce Gabs bandwidth costs for our requests
 		curl_setopt ($_GabCH, CURLOPT_COOKIEJAR, $_GabCookieFile);	// Location to store inter-request cookies
 		curl_setopt ($_GabCH, CURLOPT_COOKIEFILE, $_GabCookieFile);	// Location to load inter-request cookies
-		curl_setopt ($_GabCH, CURLOPT_USERAGENT, 'phpGab/1.0');		// Be transparent about what we are
+		curl_setopt ($_GabCH, CURLOPT_USERAGENT, 'phpGab/1.2');		// Be transparent about what we are
 		curl_setopt ($_GabCH, CURLOPT_HEADERFUNCTION, 'Gab_HeaderGet');	// Where header lines get sent for processing
 
 		// If this is a POST request, add relevant settings and data
@@ -247,7 +257,7 @@ function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader 
 				if (!is_array ($_GabData))
 					curl_setopt ($_GabCH, CURLOPT_CUSTOMREQUEST, 'POST');
 
-				if (isset ($debug) && $debug)
+				if (isset ($DEBUG) && $DEBUG)
 					echo 'Posting: '."\n".print_r (is_array ($_GabData) ? http_build_query ($_GabData) : $_GabData, TRUE)."\n";
 
 				curl_setopt ($_GabCH, CURLOPT_POSTFIELDS, (is_array ($_GabData) ? http_build_query ($_GabData) : $_GabData));
@@ -262,7 +272,7 @@ function Gab_cURL ($_GabURL, $_GabMethod = 'GET', $_GabData = NULL, $_GabHeader 
 		curl_close ($_GabCH);
 	}
 
-	if (isset ($debug) && $debug)
+	if (isset ($DEBUG) && $DEBUG)
 		echo 'cURL request to '.$_GabURL.':'.(FALSE === $_GabBody ? ' FAILED' : "\n".$_GabBody."\n");
 
 	return array ($_GabHead, $_GabBody);
