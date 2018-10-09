@@ -1,6 +1,10 @@
 # phpGab
 
-Gab.ai does not currently have a public API or [much](https://gab.ai/docs) documentation, so here are some basic, quick and dirty PHP functions to get you started talking to the Gab.ai API unofficially. Presently only posting a plain text Gab is supported, but this should be easy to extend to start doing other things.
+## Update (October 2018)
+
+Gab now has an official API and documentation at [developers.gab.com](https://developers.gab.com/).  Use that instead of this repo, which won't be updated any more.
+
+~~Gab.ai does not currently have a public API or [much](https://gab.ai/docs) documentation, so here are some basic, quick and dirty PHP functions to get you started talking to the Gab.ai API unofficially. Presently only posting a plain text Gab is supported, but this should be easy to extend to start doing other things.~~
 
 This is wholly unofficial, likely to break, and hopefully a temporary solution until Gab release an official public API. Use at your own risk and be sure to follow the Gab terms of service: [https://gab.ai/about/tos](https://gab.ai/about/tos)
 
